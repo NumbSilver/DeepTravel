@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI校园生活助手原型 - China Help</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        background: #f6f8fa;
+        color: #222;
+      }
+      .app-bar {
+        background: #3a8ee6;
+        color: #fff;
+        padding: 16px;
+        font-size: 20px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .tab-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: #fff;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 20;
+      }
+      .tab-bar a {
+        flex: 1;
+        text-align: center;
+        color: #888;
+        text-decoration: none;
+        font-size: 12px;
+      }
+      .tab-bar a.active,
+      .tab-bar a:hover {
+        color: #3a8ee6;
+      }
+      .tab-bar i {
+        display: block;
+        font-size: 22px;
+        margin-bottom: 2px;
+      }
+      .page {
+        display: none;
+        padding-bottom: 70px;
+      }
+      .page.active {
+        display: block;
+      }
+      .btn {
+        background: #3a8ee6;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 18px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .btn-outline {
+        background: #fff;
+        color: #3a8ee6;
+        border: 1px solid #3a8ee6;
+      }
+      .card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px #0001;
+        margin: 16px 12px;
+        padding: 16px;
+      }
+      .input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #eee;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+      .flex {
+        display: flex;
+        align-items: center;
+      }
+      .space-between {
+        justify-content: space-between;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #eee;
+        margin-right: 10px;
+      }
+      .post-img {
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 8px;
+      }
+      .comment {
+        margin-top: 8px;
+        padding-left: 20px;
+        color: #666;
+        font-size: 14px;
+      }
+      .calendar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 12px 0;
+      }
+      .calendar-day {
+        width: 14%;
+        text-align: center;
+        padding: 8px 0;
+        border-radius: 6px;
+        background: #e3f2fd;
+        margin-bottom: 4px;
+      }
+      .emotion-happy {
+        color: #43a047;
+      }
+      .emotion-sad {
+        color: #e53935;
+      }
+      .emotion-normal {
+        color: #fbc02d;
+      }
+      .emotion-angry {
+        color: #8e24aa;
+      }
+      .emotion-anxious {
+        color: #039be5;
+      }
+      .emotion-card {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .setting-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .setting-list li {
+        padding: 14px 16px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        color: #333;
+      }
+      .setting-list i {
+        margin-right: 12px;
+      }
+      .fab {
+        position: fixed;
+        right: 24px;
+        bottom: 80px;
+        background: #3a8ee6;
+        color: #fff;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        box-shadow: 0 2px 8px #0002;
+        z-index: 30;
+      }
+      /* 滚动条美化 */
+      ::-webkit-scrollbar {
+        width: 6px;
+        background: #f6f8fa;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #e3f2fd;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 首页/导航 -->
+    <div class="app-bar" id="appBarTitle">AI校园生活助手</div>
+
+    <!-- AI助手页 -->
+    <div class="page active" id="page-ai">
+      <div class="card" style="margin-top: 20px">
+        <div class="flex">
+          <div class="avatar">
+            <i
+              class="fa-solid fa-robot"
+              style="
+                font-size: 22px;
+                line-height: 40px;
+                text-align: center;
+                width: 40px;
+              "></i>
+          </div>
+          <div>
+            <div style="font-weight: 600">AI助手</div>
+            <div style="font-size: 13px; color: #888">
+              随时为你解答学习、生活、情感等问题
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        id="chatBox"
+        style="max-height: 340px; overflow-y: auto; padding: 0 12px">
+        <!-- 聊天内容示例 -->
+        <div class="flex" style="margin-bottom: 10px">
+          <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="card" style="margin: 0 0 0 8px; max-width: 70%">
+            今天心情有点低落，能陪我聊聊吗？
+          </div>
+        </div>
+        <div
+          class="flex"
+          style="justify-content: flex-end; margin-bottom: 10px">
+          <div
+            class="card"
+            style="
+              margin: 0 8px 0 0;
+              max-width: 70%;
+              background: #e3f2fd;
+              color: #222;
+            ">
+            当然可以，我会一直陪着你。想聊聊发生了什么吗？
+          </div>
+          <div class="avatar" style="background: #3a8ee6">
+            <i class="fa-solid fa-robot" style="color: #fff"></i>
+          </div>
+        </div>
+      </div>
+      <div class="flex" style="padding: 8px 12px 0 12px">
+        <input class="input" id="chatInput" placeholder="输入你的问题..." />
+        <button class="btn" style="margin-left: 8px">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 情绪日记页 -->
+    <div class="page" id="page-diary">
+      <div class="card" style="margin-top: 20px">
+        <div class="flex space-between">
+          <div style="font-weight: 600">情绪日记</div>
+          <button class="btn btn-outline" onclick="showDiaryInput()">
+            <i class="fa-solid fa-pen"></i> 写日记
+          </button>
+        </div>
+        <div class="calendar">
+          <div class="calendar-day emotion-happy">
+            <i class="fa-solid fa-face-smile"></i><br />1
+          </div>
+          <div class="calendar-day emotion-sad">
+            <i class="fa-solid fa-face-sad-tear"></i><br />2
+          </div>
+          <div class="calendar-day emotion-normal">
+            <i class="fa-solid fa-face-meh"></i><br />3
+          </div>
+          <div class="calendar-day emotion-angry">
+            <i class="fa-solid fa-face-angry"></i><br />4
+          </div>
+          <div class="calendar-day emotion-anxious">
+            <i class="fa-solid fa-face-grimace"></i><br />5
+          </div>
+          <div class="calendar-day emotion-happy">
+            <i class="fa-solid fa-face-smile"></i><br />6
+          </div>
+          <div class="calendar-day emotion-normal">
+            <i class="fa-solid fa-face-meh"></i><br />7
+          </div>
+        </div>
+        <div style="margin-top: 10px">
+          <div class="emotion-card">
+            <i class="fa-solid fa-face-smile emotion-happy"></i>
+            今天很开心，和朋友一起吃了火锅！
+          </div>
+          <div class="emotion-card">
+            <i class="fa-solid fa-face-sad-tear emotion-sad"></i>
+            昨天有点难过，考试没考好。
+          </div>
+        </div>
+      </div>
+      <!-- 日记输入弹窗 -->
+      <div
+        id="diaryInputModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #0005;
+          z-index: 100;
+          align-items: center;
+          justify-content: center;
+        ">
+        <div class="card" style="max-width: 320px; margin: auto">
+          <div style="font-weight: 600; margin-bottom: 8px">
+            写下你的今日心情
+          </div>
+          <select class="input" id="emotionSelect">
+            <option value="happy">😊 开心</option>
+            <option value="sad">😢 难过</option>
+            <option value="normal">😐 一般</option>
+            <option value="angry">😡 生气</option>
+            <option value="anxious">😰 焦虑</option>
+          </select>
+          <textarea
+            class="input"
+            id="diaryText"
+            rows="3"
+            placeholder="记录今天的心情和故事..."></textarea>
+          <div class="flex space-between">
+            <button class="btn btn-outline" onclick="hideDiaryInput()">
+              取消
+            </button>
+            <button class="btn" onclick="saveDiary()">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 社区广场页 -->
+    <div class="page" id="page-community">
+      <div class="card" style="margin-top: 20px">
+        <div class="flex space-between">
+          <div style="font-weight: 600">社区广场</div>
+          <button class="btn btn-outline" onclick="showPostInput()">
+            <i class="fa-solid fa-plus"></i> 发帖
+          </button>
+        </div>
+        <!-- 帖子列表 -->
+        <div id="postList">
+          <div class="card" style="margin: 12px 0">
+            <div class="flex">
+              <div class="avatar">
+                <img
+                  src="https://randomuser.me/api/portraits/men/32.jpg"
+                  style="width: 40px; height: 40px; border-radius: 50%" />
+              </div>
+              <div>
+                <div style="font-weight: 600">小明</div>
+                <div style="font-size: 13px; color: #888">1小时前</div>
+              </div>
+            </div>
+            <div style="margin: 10px 0 6px 0">大家有没有推荐的考研资料？</div>
+            <img
+              class="post-img"
+              src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" />
+            <div class="flex space-between" style="margin-top: 8px">
+              <div>
+                <i class="fa-regular fa-heart"></i> 12
+                <i class="fa-regular fa-comment"></i> 5
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="showPostDetail()">
+                查看详情
+              </button>
+            </div>
+          </div>
+          <!-- 更多帖子... -->
+        </div>
+      </div>
+      <!-- 发帖弹窗 -->
+      <div
+        id="postInputModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #0005;
+          z-index: 100;
+          align-items: center;
+          justify-content: center;
+        ">
+        <div class="card" style="max-width: 320px; margin: auto">
+          <div style="font-weight: 600; margin-bottom: 8px">发布新帖子</div>
+          <input class="input" id="postTitle" placeholder="标题（可选）" />
+          <textarea
+            class="input"
+            id="postContent"
+            rows="3"
+            placeholder="说点什么吧..."></textarea>
+          <input class="input" id="postImage" type="file" accept="image/*" />
+          <div class="flex space-between">
+            <button class="btn btn-outline" onclick="hidePostInput()">
+              取消
+            </button>
+            <button class="btn" onclick="savePost()">发布</button>
+          </div>
+        </div>
+      </div>
+      <!-- 帖子详情弹窗 -->
+      <div
+        id="postDetailModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #0005;
+          z-index: 100;
+          align-items: center;
+          justify-content: center;
+        ">
+        <div class="card" style="max-width: 340px; margin: auto">
+          <div class="flex">
+            <div class="avatar">
+              <img
+                src="https://randomuser.me/api/portraits/men/32.jpg"
+                style="width: 40px; height: 40px; border-radius: 50%" />
+            </div>
+            <div>
+              <div style="font-weight: 600">小明</div>
+              <div style="font-size: 13px; color: #888">1小时前</div>
+            </div>
+          </div>
+          <div style="margin: 10px 0 6px 0">大家有没有推荐的考研资料？</div>
+          <img
+            class="post-img"
+            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" />
+          <div class="flex space-between" style="margin-top: 8px">
+            <div>
+              <i class="fa-regular fa-heart"></i> 12
+              <i class="fa-regular fa-comment"></i> 5
+            </div>
+          </div>
+          <div style="margin-top: 12px">
+            <div class="comment"><b>小红：</b>我有电子版，私信你！</div>
+            <div class="comment"><b>阿伟：</b>推荐考研帮APP！</div>
+          </div>
+          <div class="flex" style="margin-top: 10px">
+            <input
+              class="input"
+              id="commentInput"
+              placeholder="写下你的评论..." />
+            <button class="btn" style="margin-left: 8px">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+          <div class="flex space-between" style="margin-top: 10px">
+            <button class="btn btn-outline" onclick="hidePostDetail()">
+              关闭
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 个人中心页 -->
+    <div class="page" id="page-profile">
+      <div class="card" style="margin-top: 20px; text-align: center">
+        <img
+          src="https://randomuser.me/api/portraits/women/44.jpg"
+          style="
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin-bottom: 8px;
+          " />
+        <div style="font-weight: 600; font-size: 18px">小美</div>
+        <div style="color: #888; font-size: 14px">大三 · 计算机科学与技术</div>
+        <button class="btn btn-outline" style="margin-top: 10px">
+          编辑资料
+        </button>
+      </div>
+      <div class="card">
+        <div style="font-weight: 600; margin-bottom: 8px">我的帖子</div>
+        <div class="card" style="margin: 8px 0">
+          <div class="flex space-between">
+            <div>大家有没有推荐的考研资料？</div>
+            <div style="color: #888; font-size: 13px">1小时前</div>
+          </div>
+        </div>
+        <!-- 更多我的帖子... -->
+      </div>
+      <div class="card">
+        <ul class="setting-list">
+          <li onclick="showSettings()">
+            <i class="fa-solid fa-gear"></i> 设置
+          </li>
+          <li><i class="fa-solid fa-circle-info"></i> 关于</li>
+          <li><i class="fa-solid fa-arrow-right-from-bracket"></i> 退出登录</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 设置页 -->
+    <div class="page" id="page-settings">
+      <div class="card" style="margin-top: 20px">
+        <div style="font-weight: 600; margin-bottom: 8px">设置</div>
+        <ul class="setting-list">
+          <li><i class="fa-solid fa-bell"></i> 通知设置</li>
+          <li><i class="fa-solid fa-lock"></i> 隐私安全</li>
+          <li><i class="fa-solid fa-palette"></i> 主题切换</li>
+          <li onclick="showProfile()">
+            <i class="fa-solid fa-arrow-left"></i> 返回
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="tab-bar">
+      <a href="#" class="active" onclick="switchPage('ai', this)"
+        ><i class="fa-solid fa-robot"></i>AI助手</a
+      >
+      <a href="#" onclick="switchPage('diary', this)"
+        ><i class="fa-solid fa-book"></i>情绪日记</a
+      >
+      <a href="#" onclick="switchPage('community', this)"
+        ><i class="fa-solid fa-users"></i>社区广场</a
+      >
+      <a href="#" onclick="switchPage('profile', this)"
+        ><i class="fa-solid fa-user"></i>我的</a
+      >
+    </div>
+
+    <script>
+      // 页面切换
+      function switchPage(page, el) {
+        document
+          .querySelectorAll('.page')
+          .forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + page).classList.add('active');
+        document
+          .querySelectorAll('.tab-bar a')
+          .forEach(a => a.classList.remove('active'));
+        if (el) el.classList.add('active');
+        // 顶部标题
+        const titles = {
+          ai: 'AI校园生活助手',
+          diary: '情绪日记',
+          community: '社区广场',
+          profile: '个人中心',
+        };
+        document.getElementById('appBarTitle').innerText =
+          titles[page] || 'AI校园生活助手';
+      }
+      // 日记弹窗
+      function showDiaryInput() {
+        document.getElementById('diaryInputModal').style.display = 'flex';
+      }
+      function hideDiaryInput() {
+        document.getElementById('diaryInputModal').style.display = 'none';
+      }
+      function saveDiary() {
+        hideDiaryInput();
+        alert('日记已保存！（可对接后端API）');
+      }
+      // 发帖弹窗
+      function showPostInput() {
+        document.getElementById('postInputModal').style.display = 'flex';
+      }
+      function hidePostInput() {
+        document.getElementById('postInputModal').style.display = 'none';
+      }
+      function savePost() {
+        hidePostInput();
+        alert('帖子已发布！（可对接后端API）');
+      }
+      // 帖子详情弹窗
+      function showPostDetail() {
+        document.getElementById('postDetailModal').style.display = 'flex';
+      }
+      function hidePostDetail() {
+        document.getElementById('postDetailModal').style.display = 'none';
+      }
+      // 设置页
+      function showSettings() {
+        document
+          .querySelectorAll('.page')
+          .forEach(p => p.classList.remove('active'));
+        document.getElementById('page-settings').classList.add('active');
+        document.getElementById('appBarTitle').innerText = '设置';
+      }
+      function showProfile() {
+        document
+          .querySelectorAll('.page')
+          .forEach(p => p.classList.remove('active'));
+        document.getElementById('page-profile').classList.add('active');
+        document.getElementById('appBarTitle').innerText = '个人中心';
+      }
+    </script>
+  </body>
+</html>
