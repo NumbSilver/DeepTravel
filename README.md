@@ -1,97 +1,125 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# DeepTravel - AI校园生活助手
 
-# Getting Started
+DeepTravel是一个基于React Native开发的AI校园生活助手应用，旨在为大学生提供智能化的校园生活服务。
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 功能特点
 
-## Step 1: Start Metro
+- 🤖 AI智能助手：提供智能对话和校园生活咨询服务
+- 📝 情绪日记：记录每日心情，追踪情绪变化
+- 👥 社区广场：校园社交互动平台
+- 👤 个人中心：用户信息管理
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 技术栈
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- React Native
+- TypeScript
+- React Navigation
+- OpenAI API
+- Zustand (状态管理)
 
-```sh
-# Using npm
-npm start
+## 环境要求
 
-# OR using Yarn
-yarn start
+- Node.js >= 18.0.0
+- npm >= 6.0.0 或 yarn >= 1.22.0
+- iOS: Xcode >= 12.0
+- Android: Android Studio >= 4.0
+
+## 安装步骤
+
+1. 克隆项目
+```bash
+git clone https://github.com/NumbSilver/DeepTravel.git
+cd DeepTravel
 ```
 
-## Step 2: Build and run your app
+2. 安装依赖
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```bash
+# 使用 npm
+npm install
 
-### Android
+# 或使用 yarn
+yarn install
 
-```sh
-# Using npm
-npm run android
+# 或使用 pnpm
+pnpm install
+```
 
-# OR using Yarn
-yarn android
+3. iOS 额外步骤
+```bash
+cd ios
+pod install
+cd ..
+```
+
+## 运行项目
+
+### 启动服务
+```bash
+pnpm start 
 ```
 
 ### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+```bash
+# 启动 iOS 模拟器
 npm run ios
-
-# OR using Yarn
+env /usr/bin/arch -arm64 /bin/bash --login -c "cd /Users/XXX/Downloads/DeepTravel && pnpm ios"
+# 或
 yarn ios
+# 或
+pnpm ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Android
+```bash
+# 启动 Android 模拟器
+npm run android
+# 或
+yarn android
+# 或
+pnpm android
+```
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 项目结构
 
-## Step 3: Modify your app
+```
+DeepTravel/
+├── src/
+│   ├── components/     # 可复用组件
+│   ├── navigation/     # 导航配置
+│   ├── screens/        # 页面组件
+│   ├── services/       # API 服务
+│   ├── store/         # 状态管理
+│   └── types/         # TypeScript 类型定义
+├── ios/               # iOS 原生代码
+└── android/           # Android 原生代码
+```
 
-Now that you have successfully run the app, let's make changes!
+## 开发指南
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+1. 确保已安装所有必要的开发工具
+2. 遵循项目的代码规范和提交规范
+3. 在开发新功能时，请创建新的分支
+4. 提交代码前进行测试
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 贡献指南
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
 
-## Congratulations! :tada:
+## 许可证
 
-You've successfully run and modified your React Native App. :partying_face:
+[MIT License](LICENSE)
 
-### Now what?
+## 联系方式
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+如有问题或建议，请通过以下方式联系我们：
+- 提交 Issue
+- 发送邮件至：[您的邮箱]
 
-# Troubleshooting
+## 致谢
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+感谢所有为这个项目做出贡献的开发者！
