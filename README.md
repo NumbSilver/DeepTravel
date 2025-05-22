@@ -11,11 +11,18 @@ DeepTravel是一个基于React Native开发的AI校园生活助手应用，旨�
 
 ## 技术栈
 
+### 客户端
 - React Native
 - TypeScript
 - React Navigation
 - OpenAI API
 - Zustand (状态管理)
+
+### 服务端
+- Node.js
+- Express
+- OpenRouter API
+- Axios
 
 ## 环境要求
 
@@ -32,8 +39,7 @@ git clone https://github.com/NumbSilver/DeepTravel.git
 cd DeepTravel
 ```
 
-2. 安装依赖
-
+2. 安装客户端依赖
 ```bash
 # 使用 npm
 npm install
@@ -45,7 +51,20 @@ yarn install
 pnpm install
 ```
 
-3. iOS 额外步骤
+3. 安装服务端依赖
+```bash
+cd server
+npm install
+```
+
+4. 配置环境变量
+```bash
+# 在 server 目录下创建 .env 文件
+cp .env.example .env
+# 编辑 .env 文件，填入你的 OpenRouter API Key
+```
+
+5. iOS 额外步骤
 ```bash
 cd ios
 pod install
@@ -54,16 +73,22 @@ cd ..
 
 ## 运行项目
 
-### 启动服务
+### 启动服务端
 ```bash
-pnpm start 
+cd server
+npm run dev
+```
+
+### 启动客户端
+```bash
+# 启动 Metro 服务
+pnpm start
 ```
 
 ### iOS
 ```bash
 # 启动 iOS 模拟器
 npm run ios
-env /usr/bin/arch -arm64 /bin/bash --login -c "cd /Users/XXX/Downloads/DeepTravel && pnpm ios"
 # 或
 yarn ios
 # 或
@@ -80,17 +105,61 @@ yarn android
 pnpm android
 ```
 
+## API 使用示例
+
+### 非流式对话
+```javascript
+const response = await fetch('http://localhost:3000/api/chat', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    messages: [
+      { role: 'user', content: '你好，请介绍一下自己' }
+    ]
+  })
+});
+const data = await response.json();
+```
+
+### 流式对话
+```javascript
+const response = await fetch('http://localhost:3000/api/chat/stream', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    messages: [
+      { role: 'user', content: '你好，请介绍一下自己' }
+    ]
+  })
+});
+
+const reader = response.body.getReader();
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  // 处理流式数据
+  console.log(new TextDecoder().decode(value));
+}
+```
+
 ## 项目结构
 
 ```
 DeepTravel/
-├── src/
+├── src/                # 客户端源码
 │   ├── components/     # 可复用组件
 │   ├── navigation/     # 导航配置
 │   ├── screens/        # 页面组件
 │   ├── services/       # API 服务
 │   ├── store/         # 状态管理
 │   └── types/         # TypeScript 类型定义
+├── server/            # 服务端源码
+│   ├── src/           # 服务端代码
+│   └── .env          # 环境配置
 ├── ios/               # iOS 原生代码
 └── android/           # Android 原生代码
 ```

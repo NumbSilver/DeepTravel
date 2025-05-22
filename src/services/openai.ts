@@ -1,8 +1,5 @@
 import {Message} from '../store/chatStore';
 
-const API_URL = 'https://ark-cn-beijing.bytedance.net/api/v3/chat/completions';
-const API_KEY = '957d8da1-e098-4f40-b4b4-c485fe3e9d37';
-
 export interface ChatCompletionResponse {
   choices: Array<{
     message: {

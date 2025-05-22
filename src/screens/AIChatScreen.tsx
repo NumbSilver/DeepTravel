@@ -10,14 +10,14 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {useChatStore, Message} from '../store/chatStore';
-import {sendMessage} from '../services/openai';
+import {useChatStore} from '../store/chatStore';
 import {ChatMessage} from '../components/ChatMessage';
 
 const AIChatScreen = () => {
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
-  const {messages, isLoading, addMessage, setLoading} = useChatStore();
+  const {messages, isLoading, addMessage, setLoading, sendMessageStream} =
+    useChatStore();
 
   useEffect(() => {
     // 添加欢迎消息
@@ -32,40 +32,11 @@ const AIChatScreen = () => {
   }, [messages.length, addMessage]);
 
   const handleSend = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isLoading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputText.trim(),
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    addMessage(userMessage);
+    const text = inputText.trim();
     setInputText('');
-    setLoading(true);
-
-    try {
-      const aiResponse = await sendMessage(userMessage.text);
-      const aiMessage: Message = {
-        id: Date.now().toString(),
-        text: aiResponse,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      addMessage(aiMessage);
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        text: '抱歉，我遇到了一些问题，请稍后再试。',
-        isUser: false,
-        timestamp: new Date(),
-      };
-      addMessage(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    await sendMessageStream(text);
   };
 
   return (
@@ -98,14 +69,14 @@ const AIChatScreen = () => {
         <TouchableOpacity
           style={[
             styles.sendButton,
-            !inputText.trim() && styles.sendButtonDisabled,
+            (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
           ]}
           onPress={handleSend}
           disabled={!inputText.trim() || isLoading}>
           <Icon
             name="send"
             size={20}
-            color={inputText.trim() ? '#3a8ee6' : '#ccc'}
+            color={inputText.trim() && !isLoading ? '#3a8ee6' : '#ccc'}
           />
         </TouchableOpacity>
       </View>
