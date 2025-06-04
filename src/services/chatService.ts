@@ -19,11 +19,6 @@ declare global {
     done: boolean;
     value: R;
   }
-
-  class TextDecoder {
-    constructor(label?: string, options?: TextDecoderOptions);
-    decode(input?: BufferSource, options?: TextDecodeOptions): string;
-  }
 }
 
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -63,80 +58,47 @@ export const chatService = {
   },
 
   // 流式对话
-  async sendMessageStream(
+  sendMessageStream(
     messages: Message[],
     onChunk: (chunk: string) => void,
     onComplete: () => void,
     onError: (error: Error) => void,
   ) {
-    try {
-      console.log('开始发送流式请求');
-      const response = await fetch(`${API_BASE_URL}/chat/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'text/event-stream',
-        },
-        body: JSON.stringify({
-          messages: messages.map(msg => ({
-            role: msg.isUser ? 'user' : 'assistant',
-            content: msg.text,
-          })),
-        }),
-      });
+    console.log('开始发送流式请求');
 
-      console.log('收到响应:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}/chat/stream`);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'text/event-stream');
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    let buffer = '';
 
-      // 检查响应类型
-      const contentType = response.headers.get('content-type');
-      console.log('响应类型:', contentType);
+    xhr.onprogress = () => {
+      const newData = xhr.responseText.slice(buffer.length);
+      buffer = xhr.responseText;
 
-      if (!contentType?.includes('text/event-stream')) {
-        throw new Error(`Expected text/event-stream but got ${contentType}`);
-      }
-
-      // 使用 response.text() 处理流式响应
-      const text = await response.text();
-      console.log('收到完整响应:', text);
-
-      // 处理 SSE 消息
-      const lines = text.split('\n');
-      let isConnected = false;
-
+      // 处理 SSE 格式的数据
+      const lines = newData.split('\n');
       for (const line of lines) {
         if (line.startsWith('data: ')) {
-          const jsonStr = line.slice(6);
-          console.log('处理数据行:', jsonStr);
+          const jsonStr = line.slice(6); // 移除 'data: ' 前缀
 
-          // 处理连接确认消息
-          if (!isConnected) {
-            try {
-              const data = JSON.parse(jsonStr);
-              if (data.type === 'connected') {
-                console.log('SSE 连接已建立');
-                isConnected = true;
-                continue;
-              }
-            } catch (error) {
-              console.error('解析连接消息错误:', error);
-            }
-          }
-
+          // 处理 [DONE] 标记
           if (jsonStr === '[DONE]') {
             console.log('收到结束标记');
-            continue;
+            onComplete();
+            return;
           }
 
           try {
             const data = JSON.parse(jsonStr);
+            console.log('收到数据:', data);
+
+            if (data.type === 'connected') {
+              console.log('收到连接确认');
+              continue;
+            }
+
             if (data.content) {
               console.log('收到内容:', data.content);
               onChunk(data.content);
@@ -145,16 +107,33 @@ export const chatService = {
               console.log('收到推理:', data.reasoning);
             }
           } catch (error) {
-            console.error('解析数据错误:', error, '原始数据:', jsonStr);
+            console.error('解析数据错误:', error);
           }
         }
       }
+    };
 
-      console.log('流式响应完成');
-      onComplete();
-    } catch (error) {
-      console.error('流式请求错误:', error);
-      onError(error as Error);
-    }
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        console.log('流式响应完成');
+        onComplete();
+      } else {
+        onError(new Error(`HTTP error! status: ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = () => {
+      console.error('流式请求错误');
+      onError(new Error('Network error'));
+    };
+
+    xhr.send(
+      JSON.stringify({
+        messages: messages.map(msg => ({
+          role: msg.isUser ? 'user' : 'assistant',
+          content: msg.text,
+        })),
+      }),
+    );
   },
 };

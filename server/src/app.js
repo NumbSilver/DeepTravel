@@ -46,20 +46,26 @@ app.post('/api/chat', async (req, res) => {
 app.post('/api/chat/stream', async (req, res) => {
   try {
     const {messages} = req.body;
+    console.log('收到流式请求:', messages);
 
-    // 立即设置响应头并发送初始消息
+    // 设置响应头
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
     res.setHeader('Transfer-Encoding', 'chunked');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     // 发送连接确认消息
-    res.write('data: {"type":"connected"}\n\n');
+    const connectMessage = 'data: {"type":"connected"}\n\n';
+    console.log('发送连接确认:', connectMessage);
+    res.write(connectMessage);
     res.flush?.();
 
     console.log('开始流式响应');
 
+    // 创建流式请求
     const response = await axios.post(
       'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
       {
@@ -76,9 +82,10 @@ app.post('/api/chat/stream', async (req, res) => {
       },
     );
 
+    // 处理流式响应
     response.data.on('data', chunk => {
       const chunkStr = chunk.toString();
-      console.log('收到原始数据:', chunkStr);
+      // console.log('收到原始数据:', chunkStr);
 
       // 处理 SSE 格式的数据
       const lines = chunkStr.split('\n');
@@ -89,14 +96,16 @@ app.post('/api/chat/stream', async (req, res) => {
           // 处理 [DONE] 标记
           if (jsonStr === '[DONE]') {
             console.log('收到结束标记');
-            res.write('data: [DONE]\n\n');
+            const doneMessage = 'data: [DONE]\n\n';
+            console.log('发送结束标记:', doneMessage);
+            res.write(doneMessage);
             res.flush?.();
             return;
           }
 
           try {
             const data = JSON.parse(jsonStr);
-            console.log('解析后的数据:', JSON.stringify(data, null, 2));
+            // console.log('解析后的数据:', JSON.stringify(data, null, 2));
 
             // 提取实际内容
             if (data.choices && data.choices[0].delta) {
@@ -110,11 +119,12 @@ app.post('/api/chat/stream', async (req, res) => {
                   content,
                   reasoning,
                 };
-                console.log(
-                  '发送给客户端的数据:',
-                  JSON.stringify(responseData, null, 2),
-                );
+                // console.log(
+                //   '发送给客户端的数据:',
+                //   JSON.stringify(responseData, null, 2),
+                // );
                 const sseData = `data: ${JSON.stringify(responseData)}\n\n`;
+                // console.log('发送 SSE 数据:', sseData);
                 res.write(sseData);
                 res.flush?.();
               }
