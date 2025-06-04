@@ -18,6 +18,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({message}) => {
           styles.messageBubble,
           message.isUser ? styles.userBubble : styles.aiBubble,
         ]}>
+        {!message.isUser && message.reasoning && (
+          <View style={styles.reasoningContainer}>
+            <Text style={styles.reasoningLabel}>正在思考中...</Text>
+            <Text style={styles.reasoningText}>{message.reasoning}</Text>
+          </View>
+        )}
         <Text
           style={[
             styles.messageText,
@@ -71,5 +77,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
     marginTop: 4,
+  },
+  reasoningContainer: {
+    marginBottom: 8,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  reasoningLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  reasoningText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 18,
   },
 });

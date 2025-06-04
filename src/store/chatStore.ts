@@ -4,6 +4,7 @@ import {chatService} from '../services/chatService';
 export interface Message {
   id: string;
   text: string;
+  reasoning?: string;
   isUser: boolean;
   timestamp: Date;
 }
@@ -75,6 +76,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const aiMessage: Message = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       text: '',
+      reasoning: '',
       isUser: false,
       timestamp: new Date(),
     };
@@ -88,7 +90,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
           // 更新AI消息
           set(state => ({
             messages: state.messages.map(msg =>
-              msg.id === aiMessage.id ? {...msg, text: msg.text + chunk} : msg,
+              msg.id === aiMessage.id
+                ? {
+                    ...msg,
+                    text: msg.text + (chunk.content || ''),
+                    reasoning: msg.reasoning + (chunk.reasoning || ''),
+                  }
+                : msg,
             ),
           }));
         },

@@ -60,7 +60,7 @@ export const chatService = {
   // 流式对话
   sendMessageStream(
     messages: Message[],
-    onChunk: (chunk: string) => void,
+    onData: (data: {content?: string; reasoning?: string}) => void,
     onComplete: () => void,
     onError: (error: Error) => void,
   ) {
@@ -99,12 +99,9 @@ export const chatService = {
               continue;
             }
 
-            if (data.content) {
-              console.log('收到内容:', data.content);
-              onChunk(data.content);
-            }
-            if (data.reasoning) {
-              console.log('收到推理:', data.reasoning);
+            // 将 content 和 reasoning 通过 onData 回调传递给 UI
+            if (data.content || data.reasoning) {
+              onData({content: data.content, reasoning: data.reasoning});
             }
           } catch (error) {
             console.error('解析数据错误:', error);
@@ -116,7 +113,6 @@ export const chatService = {
     xhr.onload = () => {
       if (xhr.status === 200) {
         console.log('流式响应完成');
-        onComplete();
       } else {
         onError(new Error(`HTTP error! status: ${xhr.status}`));
       }

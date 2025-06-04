@@ -47,6 +47,8 @@ const AIChatScreen = () => {
       <ScrollView
         ref={scrollViewRef}
         style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContentContainer}
+        showsVerticalScrollIndicator={true}
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}>
         {messages.map(message => (
           <ChatMessage
@@ -95,6 +97,10 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     padding: 16,
+  },
+  messagesContentContainer: {
+    flexGrow: 1,
+    paddingBottom: 16,
   },
   inputContainer: {
     flexDirection: 'row',
