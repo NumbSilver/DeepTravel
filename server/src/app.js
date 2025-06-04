@@ -31,7 +31,7 @@ app.post('/api/chat', async (req, res) => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer c07122a0-6475-4e33-be3f-9a33854117b5`,
+          Authorization: `Bearer LLM_API_KEY`,
         },
       },
     );
@@ -76,7 +76,7 @@ app.post('/api/chat/stream', async (req, res) => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer c07122a0-6475-4e33-be3f-9a33854117b5`,
+          Authorization: `Bearer LLM_API_KEY`,
         },
         responseType: 'stream',
       },

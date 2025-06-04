@@ -1,4 +1,5 @@
 import {Message} from '../store/chatStore';
+import {API_ENDPOINTS} from '../config';
 
 // 添加必要的类型定义
 declare global {
@@ -21,13 +22,11 @@ declare global {
   }
 }
 
-const API_BASE_URL = 'http://localhost:3000/api';
-
 export const chatService = {
   // 非流式对话
   async sendMessage(messages: Message[]): Promise<Message> {
     try {
-      const response = await fetch(`${API_BASE_URL}/chat`, {
+      const response = await fetch(API_ENDPOINTS.CHAT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +66,7 @@ export const chatService = {
     console.log('开始发送流式请求');
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API_BASE_URL}/chat/stream`);
+    xhr.open('POST', API_ENDPOINTS.CHAT_STREAM);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'text/event-stream');
 
