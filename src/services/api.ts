@@ -2,7 +2,7 @@ import axios from 'axios';
 import {Message} from '../types';
 
 const BASE_URL = 'https://ark.cn-beijing.volces.com/api/v3';
-const API_KEY = 'c07122a0-6475-4e33-be3f-9a33854117b5';
+const API_KEY = 'yourkey';
 
 const api = axios.create({
   baseURL: BASE_URL,

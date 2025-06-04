@@ -49,7 +49,10 @@ const AIChatScreen = () => {
         style={styles.messagesContainer}
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}>
         {messages.map(message => (
-          <ChatMessage key={message.id} message={message} />
+          <ChatMessage
+            key={`${message.timestamp.getTime()}-${message.id}-cm`}
+            message={message}
+          />
         ))}
         {isLoading && (
           <View style={styles.loadingContainer}>

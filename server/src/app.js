@@ -23,26 +23,21 @@ app.post('/api/chat', async (req, res) => {
   try {
     const {messages} = req.body;
     const response = await axios.post(
-      'https://openrouter.ai/api/v1/chat/completions',
+      'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
       {
-        model: MODEL_NAME,
         messages,
-        max_tokens: 2048,
+        model: 'deepseek-r1-250120',
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'http://localhost:3000',
-          'X-Title': 'DeepTravel AI',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer yourkey`,
         },
       },
     );
     res.json(response.data.choices[0].message);
   } catch (error) {
-    console.error(
-      'OpenRouter API Error:',
-      error.response?.data || error.message,
-    );
+    console.error('API Error:', error.response?.data || error.message);
     res.status(500).json({error: 'Failed to process request'});
   }
 });
@@ -51,31 +46,94 @@ app.post('/api/chat', async (req, res) => {
 app.post('/api/chat/stream', async (req, res) => {
   try {
     const {messages} = req.body;
+
+    // 立即设置响应头并发送初始消息
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('Transfer-Encoding', 'chunked');
+
+    // 发送连接确认消息
+    res.write('data: {"type":"connected"}\n\n');
+    res.flush?.();
+
+    console.log('开始流式响应');
+
     const response = await axios.post(
-      'https://openrouter.ai/api/v1/chat/completions',
+      'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
       {
-        model: MODEL_NAME,
         messages,
+        model: 'deepseek-r1-250120',
         stream: true,
-        max_tokens: 2048,
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'http://localhost:3000',
-          'X-Title': 'DeepTravel AI',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer yourkey`,
         },
         responseType: 'stream',
       },
     );
 
-    res.setHeader('Content-Type', 'text/event-stream');
     response.data.on('data', chunk => {
-      res.write(chunk);
+      const chunkStr = chunk.toString();
+      console.log('收到原始数据:', chunkStr);
+
+      // 处理 SSE 格式的数据
+      const lines = chunkStr.split('\n');
+      lines.forEach(line => {
+        if (line.startsWith('data: ')) {
+          const jsonStr = line.slice(6); // 移除 'data: ' 前缀
+
+          // 处理 [DONE] 标记
+          if (jsonStr === '[DONE]') {
+            console.log('收到结束标记');
+            res.write('data: [DONE]\n\n');
+            res.flush?.();
+            return;
+          }
+
+          try {
+            const data = JSON.parse(jsonStr);
+            console.log('解析后的数据:', JSON.stringify(data, null, 2));
+
+            // 提取实际内容
+            if (data.choices && data.choices[0].delta) {
+              const delta = data.choices[0].delta;
+              const content = delta.content || '';
+              const reasoning = delta.reasoning_content || '';
+
+              // 如果有内容，则立即发送给客户端
+              if (content || reasoning) {
+                const responseData = {
+                  content,
+                  reasoning,
+                };
+                console.log(
+                  '发送给客户端的数据:',
+                  JSON.stringify(responseData, null, 2),
+                );
+                const sseData = `data: ${JSON.stringify(responseData)}\n\n`;
+                res.write(sseData);
+                res.flush?.();
+              }
+            }
+          } catch (error) {
+            console.error('解析数据块错误:', error, '原始数据:', jsonStr);
+          }
+        }
+      });
     });
 
     response.data.on('end', () => {
+      console.log('流式响应结束');
       res.end();
+    });
+
+    response.data.on('error', error => {
+      console.error('流式响应错误:', error);
+      res.status(500).end();
     });
   } catch (error) {
     console.error('Stream Error:', error);

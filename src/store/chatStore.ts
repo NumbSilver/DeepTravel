@@ -64,7 +64,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // 添加用户消息
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       text,
       isUser: true,
       timestamp: new Date(),
@@ -73,7 +73,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // 创建AI响应消息
     const aiMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       text: '',
       isUser: false,
       timestamp: new Date(),
